@@ -56,6 +56,9 @@ struct Header: View {
             LinearGradient(gradient: Gradient(colors: [startColor, endColor]), startPoint: .leading, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
                 .overlay {
                     HStack(alignment: .center) {
+                        NavigationLink(destination: LocationView()) {
+                            Image(systemName: "magnifyingglass").font(.system(size: 30)).foregroundColor(.black)
+                        }
                         VStack(alignment: .leading) {
                             Text("London, GB")
                                 .font(.title2)

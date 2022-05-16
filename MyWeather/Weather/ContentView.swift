@@ -16,19 +16,22 @@ struct ContentView: View {
     var dataFetcher: DataFetcher = NetworkDataFetcher()
     
     var body: some View {
-        
-        GeometryReader { geometry in
+        NavigationView {
+            GeometryReader { geometry in
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        CurrentWeatherView().frame(height: geometry.size.width / 1.5)
+                        Divider().frame(height: 2).background(dividerColor)
+                        HourlyWeatherView().frame(height: geometry.size.width / 3)
+                        Divider().frame(height: 2).background(dividerColor)
+                        DailyWeatherView().frame(height: (geometry.size.width / 8) * 10)
+                    }
+                }.statusBar(hidden: true)
+            }
+            .navigationBarHidden(true)
             
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    CurrentWeatherView().frame(height: geometry.size.width / 1.5)
-                    Divider().frame(height: 2).background(dividerColor)
-                    HourlyWeatherView().frame(height: geometry.size.width / 3)
-                    Divider().frame(height: 2).background(dividerColor)
-                    DailyWeatherView().frame(height: (geometry.size.width / 8) * 10)
-                }
-            }.statusBar(hidden: true)
-        }
+        }.accentColor(.black)
     }
 }
 

@@ -29,7 +29,7 @@ struct DailyWeatherViewModel {
 }
 
 // MARK: - WeatherViewModel
-struct WeatherViewModel {
+struct WeatherViewModel  {
     let id: Int
     let main: String
     let description: String

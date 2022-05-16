@@ -78,9 +78,11 @@ class NetworkDataFetcher: DataFetcher {
                 completion(nil, nil)
                 return
             }
+            
             self.decode(from: data, to: T.self) { result, error in
                 completion(result, nil)
             }
+
         }
     }
     
@@ -89,7 +91,7 @@ class NetworkDataFetcher: DataFetcher {
         let decoder = JSONDecoder()
         
         do {
-            let result = try decoder.decode(type, from: data)
+            let result = try decoder.decode(type.self, from: data)
             completion(result, nil)
         } catch let error as NSError {
             completion(nil, error)
