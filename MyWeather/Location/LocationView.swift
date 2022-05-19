@@ -20,7 +20,6 @@ struct LocationView: View {
 struct LocationViewBody: View {
     
     @State private var text = ""
-    @State private var username = ""
     @State private var locationsArray = [Location]()
     
     private let backgroundColor = Color(red: 239/255, green: 243/255, blue: 244/255)
@@ -30,7 +29,7 @@ struct LocationViewBody: View {
     
     var body: some View {
         VStack {
-            ZStack {
+            VStack {
                 TextField("Enter city name", text: $text)
                     .padding()
                     .onChange(of: text) { text in
@@ -42,7 +41,6 @@ struct LocationViewBody: View {
                             guard let locations = locations else {
                                 return
                             }
-                            print(locations.count)
                             self.locationsArray = locations
                         }
                     }

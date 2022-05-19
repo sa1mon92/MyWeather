@@ -23,4 +23,18 @@ extension UserDefaults {
             completion()
         }
     }
+    
+    func savedLocation() -> Location? {
+        
+        let defaults = UserDefaults.standard
+        
+        guard let savedLocation = defaults.object(forKey: UserDefaults.savedLocationKey) as? Data else { return nil }
+        
+        guard let decodedLocation = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedLocation) as? SavedLocation else { return nil }
+        
+        let localNames = LocalNames(en: decodedLocation.localNames?.en, ru: decodedLocation.localNames?.ru)
+        let location = Location(name: decodedLocation.name, localNames: localNames, lat: decodedLocation.lat, lon: decodedLocation.lon, country: decodedLocation.country, state: decodedLocation.state)
+                
+        return location
+    }
 }

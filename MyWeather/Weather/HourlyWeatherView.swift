@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct HourlyWeatherView: View {
+    
+    @Binding var viewModel: WeatherViewModel?
+    
     var body: some View {
         
         GeometryReader { geometry in
@@ -15,11 +18,15 @@ struct HourlyWeatherView: View {
                 .overlay {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
-                            ForEach(0..<20) { _ in
-                                VStack(spacing: 15) {
-                                    Text("Now").font(Font.subheadline)
-                                    Image(systemName: "cloud.sun").symbolRenderingMode(.palette).foregroundStyle(.black, .orange).font(.system(size: 30))
-                                    Text("7°C").font(.title3).fontWeight(.medium)
+                            if let hourlyViewModels = viewModel?.hourly {
+                                ForEach(hourlyViewModels) { hourlyVM in
+                                    VStack(spacing: 0) {
+                                        Text("\(hourlyVM.time)").font(Font.subheadline)
+                                        Image("\(viewModel?.current.weather.first?.iconName ?? "Unknown")")
+                                            .resizable()
+                                            .frame(width: 60, height: 60)
+                                        Text("\(hourlyVM.temp.convertToString())°C").font(.title3).fontWeight(.medium)
+                                    }
                                 }
                             }
                         }.padding()
@@ -29,8 +36,8 @@ struct HourlyWeatherView: View {
     }
 }
 
-struct HourlyWeatherView_Previews: PreviewProvider {
-    static var previews: some View {
-        HourlyWeatherView()
-    }
-}
+//struct HourlyWeatherView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        HourlyWeatherView()
+//    }
+//}

@@ -16,7 +16,7 @@ enum RequestType {
 protocol DataFetcher {
     func getLocation(lat: Double, lon: Double, completion: @escaping ([Location]?, Error?) -> Void)
     func getLocation(city: String, completion: @escaping ([Location]?, Error?) -> Void)
-    func getWeather(lat: Double, lon: Double, completion: @escaping ([WeatherModel]?, Error?) -> Void)
+    func getWeather(lat: Double, lon: Double, completion: @escaping (WeatherModel?, Error?) -> Void)
 }
 
 class NetworkDataFetcher: DataFetcher {
@@ -42,8 +42,8 @@ class NetworkDataFetcher: DataFetcher {
         }
     }
     
-    func getWeather(lat: Double, lon: Double, completion: @escaping ([WeatherModel]?, Error?) -> Void) {
-        let parameters = ["lat": "\(lat)", "lat": "\(lat)", "exclude": "minutely,alerts", "appid": APIKey]
+    func getWeather(lat: Double, lon: Double, completion: @escaping (WeatherModel?, Error?) -> Void) {
+        let parameters = ["lat": "\(lat)", "lon": "\(lon)", "exclude": "minutely,alerts", "units": "metric", "appid": APIKey]
         request(type: .weather, parameters: parameters) { result, error in
             completion(result, error)
         }
