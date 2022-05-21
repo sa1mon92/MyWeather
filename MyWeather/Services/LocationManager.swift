@@ -5,6 +5,7 @@
 //  Created by Дмитрий Садырев on 17.05.2022.
 //
 
+import Foundation
 import CoreLocation
 
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -21,15 +22,17 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     private var locationManager: CLLocationManager = {
         let lm = CLLocationManager()
         lm.desiredAccuracy = kCLLocationAccuracyKilometer
-        lm.requestWhenInUseAuthorization()
         return lm
     }()
     
     func requestLocation() {
-        
         if let location = UserDefaults.standard.savedLocation() {
             onCompletion?(location)
-        } else if CLLocationManager.locationServicesEnabled() {
+            return
+        } else if CLLocationManager.locationServicesEnabled() && locationManager.authorizationStatus == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+            return
+        } else if locationManager.authorizationStatus == .authorizedWhenInUse {
             locationManager.requestLocation()
         } else {
             onCompletion?(nil)
@@ -44,6 +47,8 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 return
             }
             guard let location = locations?.first else { return }
+            UserDefaults.standard.saveLocation(location) {
+            }
             self.onCompletion?(location)
         }
     }
@@ -55,6 +60,25 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error.localizedDescription)
-        onCompletion?(nil)
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            print("DEBUG: Not Determined")
+        case .restricted:
+            print("DEBUG: Restricted")
+        case .denied:
+            onCompletion?(nil)
+            print("DEBUG: Denied")
+        case .authorizedAlways:
+            print("DEBUG: Authorized Always")
+        case .authorizedWhenInUse:
+            locationManager.requestLocation()
+            print("DEBUG: Authorized When In Use")
+        @unknown default:
+            break
+        }
     }
 }

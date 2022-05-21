@@ -13,9 +13,7 @@ protocol Networking {
 
 class NetworkService: Networking {
     
-    
     func requestData(url: URL, parameters: [String: String], completion: @escaping (Data?, Error?) -> Void) {
-        
         AF.request(url, method: .get, parameters: parameters).responseData { response in
             completion(response.data, response.error)
         }

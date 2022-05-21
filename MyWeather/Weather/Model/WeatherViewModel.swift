@@ -28,7 +28,6 @@ struct WeatherViewModel {
         }
         self.hourly = hourlyArray
         
-        
         var dailyArray = [DailyViewModel]()
         weather.daily.forEach { daily in
             let dailyViewModel = DailyViewModel(daily: daily)
@@ -61,7 +60,8 @@ struct CurrentViewModel {
 }
 
 // MARK: - HourlyViewModel
-struct HourlyViewModel: Identifiable {
+struct HourlyViewModel: Identifiable, Equatable {
+    
     let id = UUID()
     let dt: Int
     let temp: Double
@@ -69,16 +69,9 @@ struct HourlyViewModel: Identifiable {
     
     var time: String {
         let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let current = Date()
-        let currentHourString = String(Calendar.current.component(.hour, from: current))
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm"
-        let timeString = dateFormatter.string(from: date)
-        if currentHourString == timeString.prefix(2) {
-            return "Now"
-        } else {
-            return timeString
-        }
+        return dateFormatter.string(from: date)
     }
     
     init(hourly: Hourly) {
@@ -91,6 +84,10 @@ struct HourlyViewModel: Identifiable {
             weatherArray.append(weatherViewModel)
         }
         self.weather = weatherArray
+    }
+    
+    static func == (lhs: HourlyViewModel, rhs: HourlyViewModel) -> Bool {
+        return lhs.dt == rhs.dt ? true : false
     }
 }
 

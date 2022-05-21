@@ -24,14 +24,12 @@ final class WeatherManager: NSObject, ObservableObject {
                 self?.locationIsEmpty = true
                 return
             }
-            
             self?.dataFetcher.getWeather(lat: location.lat, lon: location.lon) { [weak self] weather, error in
                 if let error = error {
                     print(error.localizedDescription)
                     return
                 }
                 guard let weather = weather else { return }
-                
                 self?.viewModel = WeatherViewModel(weather: weather, location: location)
             }
         }

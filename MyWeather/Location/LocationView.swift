@@ -11,7 +11,7 @@ struct LocationView: View {
     var body: some View {
         VStack {
             LocationViewBody()
-        }
+        }.navigationBarColor(backgroundColor: .white, titleColor: .black)
         .navigationTitle("Search location")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -32,15 +32,14 @@ struct LocationViewBody: View {
             VStack {
                 TextField("Enter city name", text: $text)
                     .padding()
+                    .foregroundColor(.black)
                     .onChange(of: text) { text in
                         dataFetcher.getLocation(city: text) { locations, error in
                             if let error = error {
                                 print("ERROR: \(error.localizedDescription)")
                                 return
                             }
-                            guard let locations = locations else {
-                                return
-                            }
+                            guard let locations = locations else { return }
                             self.locationsArray = locations
                         }
                     }
@@ -51,22 +50,23 @@ struct LocationViewBody: View {
 
             List {
                 ForEach(locationsArray) { location in
-                    ZStack {
+                    VStack {
                         if let state = location.state {
                             Text("\(location.localNames?.ru ?? location.name), \(state), \(location.country)")
+                                .foregroundColor(.black)
                         } else {
                             Text("\(location.localNames?.ru ?? location.name), \(location.country)")
+                                .foregroundColor(.black)
                         }
-                    }
+                    }.listRowBackground(Color.white)
+                    .background(.white)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        UserDefaults.standard.saveLocation(location) {
-                            dismiss()
-                        }
+                        UserDefaults.standard.saveLocation(location) { dismiss() }
                     }
                 }
             }.listStyle(.plain)
-        }
+        }.background(.white)
     }
 }
 
