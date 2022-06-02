@@ -19,7 +19,6 @@ final class WeatherManager: NSObject, ObservableObject {
         super.init()
         
         locationManager.onCompletion = { [weak self] location in
-            
             guard let location = location else {
                 self?.locationIsEmpty = true
                 return

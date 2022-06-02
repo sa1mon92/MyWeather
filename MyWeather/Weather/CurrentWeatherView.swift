@@ -109,10 +109,9 @@ struct HeaderView: View {
     }
 }
 
-struct TopView_Previews: PreviewProvider {
-    static var previews: some View {
-        StatefulPreviewWrapper(PreviewWeatherModel.shared) { viewModel in
-            CurrentWeatherView(viewModel: viewModel)
-        }
-    }
-}
+//struct TopView_Previews: PreviewProvider {
+//
+//    static var previews: some View {
+//        CurrentWeatherView(viewModel: viewModel, notDetermined: Binding(wrappedValue: true))
+//    }
+//}

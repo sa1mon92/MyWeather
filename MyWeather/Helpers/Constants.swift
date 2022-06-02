@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-public let APIKey = "9864ff6e9ec4d888c9d3358804fe7ef6"
+public let APIKey = "918575e9973a538206f99ee7305be0e9"
 
 public let locationByCoordinatesURL = "https://api.openweathermap.org/geo/1.0/reverse"
 public let locationByCityURL = "https://api.openweathermap.org/geo/1.0/direct"

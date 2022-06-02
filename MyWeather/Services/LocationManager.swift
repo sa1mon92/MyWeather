@@ -11,8 +11,8 @@ import CoreLocation
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     private var dataFetcher: DataFetcher = NetworkDataFetcher()
-    
     var onCompletion: ((Location?) -> Void)?
+    
     
     override init() {
         super.init()
@@ -34,6 +34,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             return
         } else if locationManager.authorizationStatus == .authorizedWhenInUse {
             locationManager.requestLocation()
+            return
         } else {
             onCompletion?(nil)
         }

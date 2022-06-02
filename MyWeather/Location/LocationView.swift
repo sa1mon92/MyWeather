@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LocationView: View {
+    
     var body: some View {
         VStack {
             LocationViewBody()
@@ -67,6 +68,7 @@ struct LocationViewBody: View {
                 }
             }.listStyle(.plain)
         }.background(.white)
+            
     }
 }
 

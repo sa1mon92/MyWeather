@@ -15,6 +15,7 @@ let dividerColor = Color.init(red: 108 / 255, green: 199 / 255, blue: 237 / 255)
 struct ContentView: View {
     
     @StateObject var weatherManager = WeatherManager()
+    @State var activateLink = false
         
     var body: some View {
         NavigationView {
@@ -28,7 +29,7 @@ struct ContentView: View {
                             Divider().frame(height: 2).background(dividerColor)
                             DailyWeatherView(viewModel: $weatherManager.viewModel)
                                 .frame(height: (geometry.size.width / 8) * 10)
-                            NavigationLink(destination: LocationView(), isActive: $weatherManager.locationIsEmpty) { EmptyView() }
+                            NavigationLink(destination: LocationView(), isActive: $activateLink) { EmptyView() }
                         }.hidden(weatherManager.viewModel == nil ? true : false)
                         .accentColor(.black).onAppear {
                             weatherManager.getWeather()
@@ -42,6 +43,11 @@ struct ContentView: View {
                             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                             
                     }.background(.white)
+                        .alert(isPresented: $weatherManager.locationIsEmpty) {
+                            Alert(title: Text("Your Location is not Available"), message: Text("To give permission Go to:  Settings -> MyPlaces -> Location or choose manual Location"), dismissButton: .default(Text("OK"), action: {
+                                self.activateLink = true
+                            }))
+                        }
                 }.statusBar(hidden: false)
             }
             .navigationBarHidden(true)
