@@ -10,18 +10,20 @@ import URLImage
 
 struct CurrentWeatherView: View {
         
-    @Binding var viewModel: WeatherViewModel?
+    @EnvironmentObject var viewModel: NewWeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
         
             VStack(spacing: 0) {
-                HeaderView(viewModel: viewModel).frame(height: geometry.size.width / 4 + 15)
+                HeaderView()
+                    .environmentObject(viewModel)
+                    .frame(height: geometry.size.width / 4 + 15)
                 Divider().frame(height: 5).background(dividerColor)
                 HStack(alignment: .center, spacing: 0) {
                     VStack(spacing: 30) {
                         Rectangle()
-                        Text("\(viewModel?.current.temp.convertToString() ?? "-")°C").font(Font.custom("DINCondensed-Bold", size: 100))
+                        Text("\(viewModel.weather?.current.temp.convertToString() ?? "-")°C").font(Font.custom("DINCondensed-Bold", size: 100))
                             .frame(width: geometry.size.width / 2, height: geometry.size.width / 2)
                             .foregroundColor(.black)
                     }
@@ -47,19 +49,19 @@ struct CurrentWeatherView: View {
                                     .foregroundColor(.black)
                             }.frame(width: geometry.size.width / 4, alignment: .leading)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("\(viewModel?.current.feelsLike.convertToString() ?? "-")°C")
+                                Text((viewModel.weather?.current.feelsLike.convertToString() ?? "-") + " °C")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
-                                Text("\(viewModel?.current.windSpeed ?? "-") m/s")
+                                Text((viewModel.weather?.current.windSpeed.convertToString() ?? "-") + " m/s")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
-                                Text("\(viewModel?.current.humidity ?? "-")%")
+                                Text((viewModel.weather?.current.humidity.convertToString() ?? "-") + " %")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
-                                Text("\(viewModel?.current.pressure ?? "-") hPa")
+                                Text((viewModel.weather?.current.pressure.convertToString() ?? "-") + " hPa")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
@@ -75,7 +77,7 @@ struct CurrentWeatherView: View {
 
 struct HeaderView: View {
     
-    var viewModel: WeatherViewModel?
+    @EnvironmentObject var viewModel: NewWeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
@@ -84,21 +86,21 @@ struct HeaderView: View {
                     VStack(spacing: 40) {
                         Rectangle()
                         HStack(alignment: .center) {
-                            NavigationLink(destination: LocationView()) {
+                            NavigationLink(destination: LocationView().environmentObject(LocationViewModel())) {
                                 Image(systemName: "magnifyingglass").font(.system(size: 30)).foregroundColor(.black)
                             }
                             VStack(alignment: .leading) {
-                                Text("\(viewModel?.cityName ?? "Your location"), \(viewModel?.countryCode ?? "WW")")
+                                Text("\(viewModel.location?.name ?? "Your location"), \(viewModel.location?.country ?? "WW")")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
-                                Text("\(viewModel?.current.weather.first?.description ?? "")")
+                                Text("\(viewModel.weather?.current.weather.first?.description ?? "")")
                                     .font(.title3)
                                     .foregroundColor(.black)
                             }.frame(width: geometry.size.width / 2, alignment: .leading)
                             Spacer()
                             VStack {
-                                Image("\(viewModel?.current.weather.first?.iconName ?? "Unknown")")
+                                Image("\(viewModel.weather?.current.weather.first?.icon ?? "Unknown")")
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
                             }.frame(width: geometry.size.width / 3, alignment: .leading)
@@ -109,9 +111,10 @@ struct HeaderView: View {
     }
 }
 
-//struct TopView_Previews: PreviewProvider {
-//
-//    static var previews: some View {
-//        CurrentWeatherView(viewModel: viewModel, notDetermined: Binding(wrappedValue: true))
-//    }
-//}
+struct TopView_Previews: PreviewProvider {
+
+    static var previews: some View {
+        CurrentWeatherView()
+            .environmentObject(NewWeatherViewModel())
+    }
+}

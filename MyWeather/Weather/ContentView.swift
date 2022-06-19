@@ -14,7 +14,8 @@ let dividerColor = Color.init(red: 108 / 255, green: 199 / 255, blue: 237 / 255)
 
 struct ContentView: View {
     
-    @StateObject var weatherManager = WeatherManager()
+    @EnvironmentObject var viewModel: NewWeatherViewModel
+    
     @State var activateLink = false
         
     var body: some View {
@@ -23,27 +24,32 @@ struct ContentView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     ZStack(alignment: .top) {
                         VStack(spacing: 0) {
-                            CurrentWeatherView(viewModel: $weatherManager.viewModel).frame(height: geometry.size.width / 4 + geometry.size.width / 2.5 + 20)
+                            CurrentWeatherView()
+                                .environmentObject(viewModel)
+                                .frame(height: geometry.size.width / 4 + geometry.size.width / 2.5 + 20)
                             Divider().frame(height: 2).background(dividerColor)
-                            HourlyWeatherView(viewModel: $weatherManager.viewModel).frame(height: geometry.size.width / 3)
+                            HourlyWeatherView()
+                                .environmentObject(viewModel)
+                                .frame(height: geometry.size.width / 3)
                             Divider().frame(height: 2).background(dividerColor)
-                            DailyWeatherView(viewModel: $weatherManager.viewModel)
+                            DailyWeatherView()
+                                .environmentObject(viewModel)
                                 .frame(height: (geometry.size.width / 8) * 10)
-                            NavigationLink(destination: LocationView(), isActive: $activateLink) { EmptyView() }
-                        }.hidden(weatherManager.viewModel == nil ? true : false)
+                            NavigationLink(destination: LocationView().environmentObject(LocationViewModel()), isActive: $activateLink) { EmptyView() }
+                        }.hidden(viewModel.weather == nil ? true : false)
                         .accentColor(.black).onAppear {
-                            weatherManager.getWeather()
+                            //weatherManager.getWeather()
                         }
                         VStack {
                             ProgressView()
                                 .progressViewStyle(.circular)
                                 .tint(.gray)
                             Text("Loading weather...").foregroundColor(.black)
-                        }.hidden(weatherManager.viewModel == nil ? false : true)
+                        }.hidden(viewModel.weather == nil ? false : true)
                             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                             
                     }.background(.white)
-                        .alert(isPresented: $weatherManager.locationIsEmpty) {
+                        .alert(isPresented: $viewModel.locationIsEmpty) {
                             Alert(title: Text("Your Location is not Available"), message: Text("To give permission Go to:  Settings -> MyPlaces -> Location or choose manual Location"), dismissButton: .default(Text("OK"), action: {
                                 self.activateLink = true
                             }))
@@ -59,6 +65,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(NewWeatherViewModel())
     }
 }
 

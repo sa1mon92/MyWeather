@@ -23,6 +23,17 @@ struct Location: Codable, Identifiable {
         case localNames = "local_names"
         case lat, lon, country, state
     }
+    
+    init?(from data: Data) {
+        guard let decodedLocation = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? SavedLocation else { return nil }
+        
+        self.name = decodedLocation.name
+        self.localNames = LocalNames(en: decodedLocation.localNames?.en, ru: decodedLocation.localNames?.ru)
+        self.lat = decodedLocation.lat
+        self.lon = decodedLocation.lon
+        self.country = decodedLocation.country
+        self.state = decodedLocation.state
+    }
 }
 
 // MARK: - LocalNames
