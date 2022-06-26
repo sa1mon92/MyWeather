@@ -10,15 +10,14 @@ import URLImage
 
 struct CurrentWeatherView: View {
         
-    @EnvironmentObject var viewModel: NewWeatherViewModel
+    @EnvironmentObject var viewModel: WeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
-        
             VStack(spacing: 0) {
                 HeaderView()
                     .environmentObject(viewModel)
-                    .frame(height: geometry.size.width / 4 + 15)
+                    .frame(height: geometry.size.width / 4.5)
                 Divider().frame(height: 5).background(dividerColor)
                 HStack(alignment: .center, spacing: 0) {
                     VStack(spacing: 30) {
@@ -77,14 +76,13 @@ struct CurrentWeatherView: View {
 
 struct HeaderView: View {
     
-    @EnvironmentObject var viewModel: NewWeatherViewModel
+    @EnvironmentObject var viewModel: WeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
             LinearGradient(gradient: Gradient(colors: [startColor, endColor]), startPoint: .leading, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
                 .overlay {
                     VStack(spacing: 40) {
-                        Rectangle()
                         HStack(alignment: .center) {
                             NavigationLink(destination: LocationView().environmentObject(LocationViewModel())) {
                                 Image(systemName: "magnifyingglass").font(.system(size: 30)).foregroundColor(.black)
@@ -115,6 +113,6 @@ struct TopView_Previews: PreviewProvider {
 
     static var previews: some View {
         CurrentWeatherView()
-            .environmentObject(NewWeatherViewModel())
+            .environmentObject(WeatherViewModel())
     }
 }

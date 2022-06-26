@@ -7,7 +7,8 @@
 
 import Foundation
 
-enum WeatherAPIError: Error, LocalizedError {
+enum APIError: Error, LocalizedError {
+    case locationInvalid
     case urlError(URLError)
     case responseError(Int)
     case decodingError(DecodingError)
@@ -23,6 +24,8 @@ enum WeatherAPIError: Error, LocalizedError {
             return "Bad response code: \(status)"
         case .genericError:
             return "An unknown error has been occured"
+        case .locationInvalid:
+            return "Location invalid"
         }
     }
 }

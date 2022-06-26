@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DailyWeatherView: View {
     
-    @EnvironmentObject var viewModel: NewWeatherViewModel
+    @EnvironmentObject var viewModel: WeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
@@ -67,6 +67,6 @@ struct DailyWeatherCell: View {
 struct DailyWeatherView_Previews: PreviewProvider {
     static var previews: some View {
         DailyWeatherView()
-            .environmentObject(NewWeatherViewModel())
+            .environmentObject(WeatherViewModel())
     }
 }

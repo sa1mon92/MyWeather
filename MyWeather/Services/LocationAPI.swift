@@ -10,6 +10,7 @@ import Combine
 
 class LocationAPI {
     static let shared = LocationAPI()
+    private let APIKey = "918575e9973a538206f99ee7305be0e9"
     private let baseURL = "https://api.openweathermap.org/geo/1.0/"
     
     private init() {}
@@ -46,7 +47,7 @@ class LocationAPI {
             .eraseToAnyPublisher()
     }
     
-    func fetchLocation(lat: Double, lon: Double) -> AnyPublisher<[Location], Never> {
+    func fetchLocations(lat: Double, lon: Double) -> AnyPublisher<[Location], Never> {
         guard let url = locationAsoluteURL(lat: lat, lon: lon) else {
             return Just([Location]())
                 .eraseToAnyPublisher()
@@ -54,7 +55,7 @@ class LocationAPI {
         return getPublisher(url: url)
     }
     
-    func fetchLocation(city: String) -> AnyPublisher<[Location], Never> {
+    func fetchLocations(city: String) -> AnyPublisher<[Location], Never> {
         guard let url = locationAsoluteURL(city: city) else {
             return Just([Location]())
                 .eraseToAnyPublisher()

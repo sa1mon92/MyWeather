@@ -10,7 +10,6 @@ import Combine
 
 class WeatherAPI {
     static let shared = WeatherAPI()
-    //private let APIKey = "918575e9973a538206f99ee7305be0e9"
     private let baseURL = "https://api.openweathermap.org/data/2.5/onecall"
     private var subscriptions = Set<AnyCancellable>()
 
@@ -27,27 +26,13 @@ class WeatherAPI {
         return urlComponents.url
     }
     
-//    func fetchWeather(from location: Location) -> Future<WeatherModel?, WeatherAPIError> {
-//        guard let url = weatherAsoluteURL(lat: location.lat, lon: location.lon) else {
-//            return Just(nil)
-//                .eraseToAnyPublisher()
-//        }
-//        return URLSession.shared.dataTaskPublisher(for: url)
-//            .map({ $0.data })
-//            .decode(type: WeatherModel?.self, decoder: JSONDecoder())
-//            .catch { error in Just(nil)}
-//            .receive(on: RunLoop.main)
-//            .eraseToAnyPublisher()
-//    }
-    
-    
-    func fetchWeather(from location: Location) -> Future<WeatherModel?, WeatherAPIError> {
-        return Future<WeatherModel?, WeatherAPIError> { [unowned self] promise in
+    func fetchWeather(from location: Location) -> Future<WeatherModel?, APIError> {
+        return Future<WeatherModel?, APIError> { [unowned self] promise in
             guard let url = self.weatherAsoluteURL(lat: location.lat, lon: location.lon) else { return promise(.failure(.urlError(URLError(URLError.unsupportedURL)))) }
             URLSession.shared.dataTaskPublisher(for: url)
                 .tryMap({ (data, response) -> Data in
                     guard let httpResponse = response as? HTTPURLResponse, 200...300 ~= httpResponse.statusCode else {
-                        throw WeatherAPIError.responseError((response as? HTTPURLResponse)?.statusCode ?? 500)
+                        throw APIError.responseError((response as? HTTPURLResponse)?.statusCode ?? 500)
                     }
                     return data
                 })
@@ -57,13 +42,10 @@ class WeatherAPI {
                     if case let .failure(error) = completion {
                         switch error {
                         case let urlError as URLError:
-                            print("urlError - \(urlError)")
                             promise(.failure(.urlError(urlError)))
                         case let decodingError as DecodingError:
-                            print("decodingError - \(decodingError)")
                             promise(.failure(.decodingError(decodingError)))
-                        case let apiError as WeatherAPIError:
-                            print("apiError - \(apiError)")
+                        case let apiError as APIError:
                             promise(.failure(apiError))
                         default:
                             promise(.failure(.genericError))

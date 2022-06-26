@@ -13,7 +13,7 @@ struct MyWeatherApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(NewWeatherViewModel())
+                .environmentObject(WeatherViewModel())
                 .preferredColorScheme(.light)
         }
     }

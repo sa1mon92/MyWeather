@@ -40,20 +40,17 @@ struct LocationViewBody: View {
                 ForEach(viewModel.locations) { location in
                     VStack {
                         if let state = location.state {
-                            Text("\(location.localNames?.ru ?? location.name), \(state), \(location.country)")
+                            Text("\(location.localNames?.en ?? location.name), \(state), \(location.country)")
                                 .foregroundColor(.black)
                         } else {
-                            Text("\(location.localNames?.ru ?? location.name), \(location.country)")
+                            Text("\(location.localNames?.en ?? location.name), \(location.country)")
                                 .foregroundColor(.black)
                         }
                     }.listRowBackground(Color.white)
                     .background(.white)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        let intvalue = Int.random(in: 1..<100)
-                        UserDefaults.standard.set(intvalue, forKey: "test")
                         UserDefaults.standard.saveLocation(location) { dismiss() }
-                        
                     }
                 }
             }.listStyle(.plain)

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HourlyWeatherView: View {
     
-    @EnvironmentObject var viewModel: NewWeatherViewModel
+    @EnvironmentObject var viewModel: WeatherViewModel
     
     var body: some View {
         
@@ -49,6 +49,6 @@ struct HourlyWeatherView: View {
 struct HourlyWeatherView_Previews: PreviewProvider {
     static var previews: some View {
         HourlyWeatherView()
-            .environmentObject(NewWeatherViewModel())
+            .environmentObject(WeatherViewModel())
     }
 }

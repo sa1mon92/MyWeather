@@ -1,181 +1,100 @@
 //
-//  WeatherViewModel.swift
+//  NewWeatherViewModel.swift
 //  MyWeather
 //
-//  Created by Дмитрий Садырев on 17.05.2022.
+//  Created by Дмитрий Садырев on 17.06.2022.
 //
 
-import Foundation
 import SwiftUI
+import Combine
 
-// MARK: - WeatherViewModel
-struct WeatherViewModel {
-    let cityName: String
-    let countryCode: String
-    let current: CurrentViewModel
-    let hourly: [HourlyViewModel]
-    let daily: [DailyViewModel]
+final class WeatherViewModel: ObservableObject {
     
-    init(weather: WeatherModel, location: Location) {
-        self.cityName = location.name
-        self.countryCode = location.country
-        self.current = CurrentViewModel(curreent: weather.current)
-        
-        var hourlyArray = [HourlyViewModel]()
-        weather.hourly.forEach { hourly in
-            let hourlyViewModel = HourlyViewModel(hourly: hourly)
-            hourlyArray.append(hourlyViewModel)
+    private var cancellableSet: Set<AnyCancellable> = []
+    private var weatherAPI = WeatherAPI.shared
+    private var locationManager: LocationManagerProtocol = LocationManager()
+    
+    @Published var location: Location? {
+        didSet {
+            print("location setup")
         }
-        self.hourly = hourlyArray
+    }
+    @Published var weather: WeatherModel?
+    @Published var alertProvider = AlertProvider()
+    @Published var activateLocationLink = false
+    @Published var shouldShowAlert = false
         
-        var dailyArray = [DailyViewModel]()
-        weather.daily.forEach { daily in
-            let dailyViewModel = DailyViewModel(daily: daily)
-            dailyArray.append(dailyViewModel)
+    init() {
+        subscribeLocation()
+        subscribeLocationManager()
+    }
+    
+    func checkLocation() {
+        shouldShowAlert = location == nil && alertProvider.alert != nil
+    }
+    
+    private func subscribeLocation() {
+        $location
+            .flatMap({(_location) -> AnyPublisher<WeatherModel?, Never> in
+                guard let _location = _location else {
+                    return Just(nil)
+                        .eraseToAnyPublisher()
+                }
+                return self.weatherAPI.fetchWeather(from: _location)
+                    .replaceError(with: nil)
+                    .eraseToAnyPublisher()
+            })
+            .receive(on: RunLoop.main)
+            .assign(to: \.weather, on: self)
+            .store(in: &self.cancellableSet)
+    }
+    
+    private func subscribeLocationManager() {
+        
+        locationManager.locationPublisher
+            .receive(on: RunLoop.main)
+            .assign(to: \.location, on: self)
+            .store(in: &self.cancellableSet)
+        
+        locationManager.locationStatePublisher
+            .sink(receiveValue: { state in
+                switch state {
+                case .locationServicesDisabled:
+                    self.presentAlert(title: "Your location is not available", message: "Please enable Location Services") {
+                        guard let url = URL(string:"App-Prefs:root=LOCATION_SERVICES") else { return }
+                        if UIApplication.shared.canOpenURL(url) {
+                           UIApplication.shared.open(url, options: [:])
+                        }
+                    }
+                case .denied:
+                    self.presentAlert(title: "Your location is not available", message: "Please allow access to your location in the app settings") {
+                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                        if UIApplication.shared.canOpenURL(url) {
+                           UIApplication.shared.open(url, options: [:])
+                        }
+                    }
+                case .restricted:
+                    break
+                case .notDetermined, .authorizedAlways, .authorizedWhenInUse, .unknown:
+                    break
+                }
+            })
+            .store(in: &self.cancellableSet)
+    }
+    
+    private func presentAlert(title: String, message: String, primaryButtonAction: @escaping () -> Void) {
+        alertProvider.alert = AlertProvider.Alert(title: title,
+                                                  message: message,
+                                                  primaryButtonText: "OK",
+                                                  primaryButtonAction: primaryButtonAction,
+                                                  secondaryButtonText: "Cancel",
+                                                  secondaryButtonAction: { self.activateLocationLink = true })
+        shouldShowAlert = true
+    }
+    
+    deinit {
+        for cancellable in cancellableSet {
+            cancellable.cancel()
         }
-        self.daily = dailyArray
     }
 }
-
-// MARK: - CurrentViewModel
-struct CurrentViewModel {
-    let temp, feelsLike: Double
-    let pressure, humidity, windSpeed: String
-    let weather: [WeatherDescriptionViewModel]
-    
-    init(curreent: Current) {
-        self.temp = curreent.temp
-        self.feelsLike = curreent.feelsLike
-        self.pressure = String(curreent.pressure)
-        self.humidity = String(curreent.humidity)
-        self.windSpeed = String(format: "%.1f", curreent.windSpeed)
-        
-        var weatherArray = [WeatherDescriptionViewModel]()
-        curreent.weather.forEach { weather in
-            let weatherViewModel = WeatherDescriptionViewModel(weather: weather)
-            weatherArray.append(weatherViewModel)
-        }
-        self.weather = weatherArray
-    }
-}
-
-// MARK: - HourlyViewModel
-struct HourlyViewModel: Identifiable, Equatable {
-    
-    let id = UUID()
-    let dt: Int
-    let temp: Double
-    let weather: [WeatherDescriptionViewModel]
-    
-    var time: String {
-        let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        return dateFormatter.string(from: date)
-    }
-    
-    init(hourly: Hourly) {
-        self.dt = hourly.dt
-        self.temp = hourly.temp
-        
-        var weatherArray = [WeatherDescriptionViewModel]()
-        hourly.weather.forEach { weather in
-            let weatherViewModel = WeatherDescriptionViewModel(weather: weather)
-            weatherArray.append(weatherViewModel)
-        }
-        self.weather = weatherArray
-    }
-    
-    static func == (lhs: HourlyViewModel, rhs: HourlyViewModel) -> Bool {
-        return lhs.dt == rhs.dt ? true : false
-    }
-}
-
-// MARK: - DailyViewModel
-struct DailyViewModel: Identifiable {
-    let id = UUID()
-    let dt: Int
-    let temp: TempViewModel
-    let weather: [WeatherDescriptionViewModel]
-    
-    var date: String {
-        let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "en")
-        dateFormatter.dateFormat = "MMMM d"
-        return dateFormatter.string(from: date)
-    }
-    
-    var weekDay: String {
-        
-        let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let currentDate = Date()
-        
-        let weekDayFormatter = DateFormatter()
-        weekDayFormatter.locale = Locale(identifier: "en")
-        weekDayFormatter.dateFormat = "EEEE"
-        
-        let dayFormatter = DateFormatter()
-        dayFormatter.dateFormat = "dd/MM/yyyy"
-        
-        if dayFormatter.string(from: date) == dayFormatter.string(from: currentDate) {
-            return "Today"
-        } else {
-            return weekDayFormatter.string(from: date)
-        }
-    }
-    
-    var weekDayColor: Color {
-        
-        let date = Date(timeIntervalSince1970: TimeInterval(dt))
-        let weekDayFormatter = DateFormatter()
-        weekDayFormatter.locale = Locale(identifier: "en")
-        weekDayFormatter.dateFormat = "EEEE"
-        let weekDay = weekDayFormatter.string(from: date)
-        
-        switch weekDay {
-        case "Saturday", "Sunday":
-            return Color.red
-        default:
-            return Color.black
-        }
-    }
-    
-    init(daily: Daily) {
-        self.dt = daily.dt
-        self.temp = TempViewModel(temp: daily.temp)
-        
-        var weatherArray = [WeatherDescriptionViewModel]()
-        daily.weather.forEach { weather in
-            let weatherViewModel = WeatherDescriptionViewModel(weather: weather)
-            weatherArray.append(weatherViewModel)
-        }
-        self.weather = weatherArray
-    }
-}
-
-// MARK: - WeatherDescriptionViewModel
-struct WeatherDescriptionViewModel {
-    let id: Int
-    let main: String
-    let description: String
-    let iconName: String
-    
-    init(weather: Weather) {
-        self.id = weather.id
-        self.main = weather.main
-        self.description = weather.description
-        self.iconName = weather.icon
-    }
-}
-
-// MARK: - TempViewModel
-struct TempViewModel {
-    let min, max: Double
-    
-    init(temp: Temp) {
-        self.min = temp.min
-        self.max = temp.max
-    }
-}
-

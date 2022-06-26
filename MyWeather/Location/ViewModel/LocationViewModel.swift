@@ -20,7 +20,7 @@ final class LocationViewModel: ObservableObject {
             .debounce(for: 0.3, scheduler: RunLoop.main)
             .removeDuplicates()
             .flatMap { (city: String) -> AnyPublisher<[Location], Never> in
-                return self.locationAPI.fetchLocation(city: city)
+                return self.locationAPI.fetchLocations(city: city)
             }
             .assign(to: \.locations, on: self)
             .store(in: &self.cancellableSet)
