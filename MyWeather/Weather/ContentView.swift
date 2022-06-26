@@ -8,50 +8,68 @@
 import SwiftUI
 import CoreLocation
 
-let startColor = Color(red: 115 / 255, green: 253 / 255, blue: 255 / 255)
-let endColor = Color(red: 118 / 255, green: 214 / 255, blue: 255 / 255)
-let dividerColor = Color.init(red: 108 / 255, green: 199 / 255, blue: 237 / 255)
-
 struct ContentView: View {
     
-    @StateObject var weatherManager = WeatherManager()
+    @EnvironmentObject var viewModel: WeatherViewModel
+    @Environment(\.scenePhase) var scenePhase
+    
     @State var activateLink = false
-        
+    @State var statusBarHidden = false
+    
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
                 ScrollView(.vertical, showsIndicators: false) {
                     ZStack(alignment: .top) {
                         VStack(spacing: 0) {
-                            CurrentWeatherView(viewModel: $weatherManager.viewModel).frame(height: geometry.size.width / 4 + geometry.size.width / 2.5 + 20)
+                            CurrentWeatherView()
+                                .environmentObject(viewModel)
+                                .frame(height: geometry.size.width / 4 + geometry.size.width / 2.5 + 20)
                             Divider().frame(height: 2).background(dividerColor)
-                            HourlyWeatherView(viewModel: $weatherManager.viewModel).frame(height: geometry.size.width / 3)
+                            HourlyWeatherView()
+                                .environmentObject(viewModel)
+                                .frame(height: geometry.size.width / 3)
                             Divider().frame(height: 2).background(dividerColor)
-                            DailyWeatherView(viewModel: $weatherManager.viewModel)
+                            DailyWeatherView()
+                                .environmentObject(viewModel)
                                 .frame(height: (geometry.size.width / 8) * 10)
-                            NavigationLink(destination: LocationView(), isActive: $activateLink) { EmptyView() }
-                        }.hidden(weatherManager.viewModel == nil ? true : false)
-                        .accentColor(.black).onAppear {
-                            weatherManager.getWeather()
-                        }
+                            NavigationLink(destination: LocationView().environmentObject(LocationViewModel()), isActive: $viewModel.activateLocationLink) { EmptyView() }
+                        }.hidden(viewModel.weather == nil ? true : false)
+                            .accentColor(.black)
                         VStack {
                             ProgressView()
                                 .progressViewStyle(.circular)
                                 .tint(.gray)
                             Text("Loading weather...").foregroundColor(.black)
-                        }.hidden(weatherManager.viewModel == nil ? false : true)
+                        }.hidden(viewModel.weather == nil ? false : true)
                             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
-                            
-                    }.background(.white)
-                        .alert(isPresented: $weatherManager.locationIsEmpty) {
-                            Alert(title: Text("Your Location is not Available"), message: Text("To give permission Go to:  Settings -> MyPlaces -> Location or choose manual Location"), dismissButton: .default(Text("OK"), action: {
-                                self.activateLink = true
-                            }))
+                    }.background(GeometryReader {
+                        Color.clear.preference(key: ViewOffsetKey.self,
+                            value: -$0.frame(in: .named("scroll")).origin.y)
+                    })
+                    .onPreferenceChange(ViewOffsetKey.self) {
+                        print($0)
+                        if $0 > 0 && statusBarHidden == false {
+                            statusBarHidden = true
+                        } else if $0 < 0 && statusBarHidden == true {
+                            statusBarHidden = false
                         }
-                }.statusBar(hidden: false)
-            }
+                    }
+                        .onAppear{
+                            viewModel.checkLocation()
+                        }
+                        .alert(isPresented: $viewModel.shouldShowAlert) {
+                            guard let alert = viewModel.alertProvider.alert else { fatalError("Alert not available") }
+                            return Alert(alert)
+                        }
+                }.coordinateSpace(name: "scroll")         }
             .navigationBarHidden(true)
-            .edgesIgnoringSafeArea(.all)
+        }
+        .statusBar(hidden: statusBarHidden)
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                viewModel.checkLocation()
+            }
         }
     }
 }
@@ -59,6 +77,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(WeatherViewModel())
     }
 }
-

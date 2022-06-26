@@ -9,14 +9,16 @@ import SwiftUI
 
 struct DailyWeatherView: View {
     
-    @Binding var viewModel: WeatherViewModel?
+    @EnvironmentObject var viewModel: WeatherViewModel
     
     var body: some View {
         GeometryReader { geometry in
             List {
-                if let dailyViewModels = viewModel?.daily {
+                if let dailyViewModels = viewModel.weather?.daily {
                     ForEach(dailyViewModels) { dailyViewModel in
-                        DailyWeatherCell(viewModel: dailyViewModel).frame(height: geometry.size.width / 8)
+                        DailyWeatherCell(viewModel: dailyViewModel)
+                            .environmentObject(viewModel)
+                            .frame(height: geometry.size.width / 8)
                             .listRowBackground(Color.white)
                     }
                 }
@@ -27,7 +29,7 @@ struct DailyWeatherView: View {
 
 struct DailyWeatherCell: View {
     
-    var viewModel: DailyViewModel
+    var viewModel: Daily
     
     var body: some View {
         GeometryReader { geometry in
@@ -42,7 +44,7 @@ struct DailyWeatherCell: View {
                 }.frame(width: geometry.size.width / 2, alignment: .leading)
                 Spacer()
                 HStack {
-                    Image("\(viewModel.weather.first?.iconName ?? "Unknown")")
+                    Image("\(viewModel.weather.first?.icon ?? "Unknown")")
                         .resizable()
                         .frame(width: 50, height: 50)
                     Spacer()
@@ -64,9 +66,7 @@ struct DailyWeatherCell: View {
 
 struct DailyWeatherView_Previews: PreviewProvider {
     static var previews: some View {
-        StatefulPreviewWrapper(PreviewWeatherModel.shared) { viewModel in
-            DailyWeatherView(viewModel: viewModel)
-                .previewInterfaceOrientation(.portrait)
-        }
+        DailyWeatherView()
+            .environmentObject(WeatherViewModel())
     }
 }

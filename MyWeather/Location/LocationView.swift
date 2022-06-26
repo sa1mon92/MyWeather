@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LocationView: View {
-    
+        
     var body: some View {
         VStack {
             LocationViewBody()
@@ -20,43 +20,30 @@ struct LocationView: View {
 
 struct LocationViewBody: View {
     
-    @State private var text = ""
-    @State private var locationsArray = [Location]()
-    
     private let backgroundColor = Color(red: 239/255, green: 243/255, blue: 244/255)
-    private let dataFetcher: DataFetcher = NetworkDataFetcher()
+    @EnvironmentObject var viewModel: LocationViewModel
     
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack {
             VStack {
-                TextField("Enter city name", text: $text)
+                TextField("Enter city name", text: $viewModel.city)
                     .padding()
                     .foregroundColor(.black)
-                    .onChange(of: text) { text in
-                        dataFetcher.getLocation(city: text) { locations, error in
-                            if let error = error {
-                                print("ERROR: \(error.localizedDescription)")
-                                return
-                            }
-                            guard let locations = locations else { return }
-                            self.locationsArray = locations
-                        }
-                    }
             }
             .background(backgroundColor)
             .cornerRadius(10)
             .padding()
 
             List {
-                ForEach(locationsArray) { location in
+                ForEach(viewModel.locations) { location in
                     VStack {
                         if let state = location.state {
-                            Text("\(location.localNames?.ru ?? location.name), \(state), \(location.country)")
+                            Text("\(location.localNames?.en ?? location.name), \(state), \(location.country)")
                                 .foregroundColor(.black)
                         } else {
-                            Text("\(location.localNames?.ru ?? location.name), \(location.country)")
+                            Text("\(location.localNames?.en ?? location.name), \(location.country)")
                                 .foregroundColor(.black)
                         }
                     }.listRowBackground(Color.white)
@@ -75,5 +62,6 @@ struct LocationViewBody: View {
 struct Location_Previews: PreviewProvider {
     static var previews: some View {
         LocationView()
+            .environmentObject(LocationViewModel())
     }
 }
