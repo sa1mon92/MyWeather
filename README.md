@@ -7,7 +7,7 @@ This is a simple weather application with the ability to determine your geolocat
 * [OpenWeatherMap API](https://openweathermap.org/api)
 ***
 ###  __Preview__
-![<img src="Preview_1.png" width="200" height="400">](Preview_1.png)![<img src="Preview_2.png" width="200" height="400">](Preview_2.png)
+![<img src="Preview_1.png" width="397" height="800">](Preview_1.png)![<img src="Preview_2.png" width="397" height="800">](Preview_2.png)
 ***
 ###  __Feedback__
 Telegram - @Sa1monch
