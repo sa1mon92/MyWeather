@@ -10,5 +10,5 @@ This is a simple weather application with the ability to determine your geolocat
 ![<img src="Preview_1.png" width="397" height="800">](Preview_1.png)![<img src="Preview_2.png" width="397" height="800">](Preview_2.png)
 ***
 ###  __Feedback__
-Telegram - @Sa1monch
+Telegram - @Sa1monch  
 Email - sadyrevdimon@icloud.com
