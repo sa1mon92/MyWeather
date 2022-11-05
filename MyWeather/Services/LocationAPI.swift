@@ -10,7 +10,7 @@ import Combine
 
 class LocationAPI {
     static let shared = LocationAPI()
-    private let APIKey = "918575e9973a538206f99ee7305be0e9"
+    private let APIKey = "YOUR API KEY OPENWEATHERMAP"
     private let baseURL = "https://api.openweathermap.org/geo/1.0/"
     
     private init() {}
