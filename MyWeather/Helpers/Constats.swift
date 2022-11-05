@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public let APIKey = "918575e9973a538206f99ee7305be0e9"
+public let APIKey = "YOUR API KEY OPENWEATHERMAP"
 
 public let startColor = Color(red: 115 / 255, green: 253 / 255, blue: 255 / 255)
 public let endColor = Color(red: 118 / 255, green: 214 / 255, blue: 255 / 255)
